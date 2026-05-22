@@ -1,0 +1,234 @@
+.voice-controls-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.voice-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: white;
+}
+
+/* Microphone Button */
+.mic-button {
+  background-color: #3b82f6;
+}
+
+.mic-button:hover:not(:disabled) {
+  background-color: #2563eb;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.mic-button.active {
+  background-color: #ef4444;
+  animation: pulse-red 1.5s infinite;
+}
+
+.mic-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Speaker Button */
+.speaker-button {
+  background-color: #8b5cf6;
+}
+
+.speaker-button:hover:not(:disabled) {
+  background-color: #7c3aed;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.speaker-button.active {
+  background-color: #10b981;
+  animation: pulse-green 1.5s infinite;
+}
+
+.speaker-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Voice Selector */
+.voice-selector {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  background-color: white;
+  color: #374151;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  max-width: 150px;
+}
+
+.voice-selector:hover:not(:disabled) {
+  border-color: #2563eb;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.voice-selector:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.voice-selector:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Status Indicator */
+.voice-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: white;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 120px;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Listening Indicator */
+.listening-indicator {
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.listening-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+/* Speaking Indicator */
+.speaking-indicator {
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.speaking-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.speaking-dots .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: #10b981;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite;
+}
+
+.speaking-dots .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.speaking-dots .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-8px);
+  }
+}
+
+/* Idle Indicator */
+.idle-indicator {
+  color: #6b7280;
+}
+
+/* Pulse animations */
+@keyframes pulse-red {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+  }
+  50% {
+    box-shadow: 0 2px 16px rgba(239, 68, 68, 0.4);
+  }
+}
+
+@keyframes pulse-green {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+  }
+  50% {
+    box-shadow: 0 2px 16px rgba(16, 185, 129, 0.4);
+  }
+}
+
+/* SVG Icons */
+.voice-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .voice-controls-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .voice-selector {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .voice-indicator {
+    min-width: 100%;
+  }
+}

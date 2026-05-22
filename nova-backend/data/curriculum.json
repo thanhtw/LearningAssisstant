@@ -1,0 +1,109 @@
+{
+  "topics": [
+    {
+      "id": "variables",
+      "title": "Variables & Assignment",
+      "level": "beginner",
+      "prerequisites": [],
+      "description": "Learn how to create variables and assign values in Python. Understand variable naming conventions and types."
+    },
+    {
+      "id": "data_types",
+      "title": "Data Types",
+      "level": "beginner",
+      "prerequisites": ["variables"],
+      "description": "Explore Python's built-in data types: integers, floats, strings, booleans, and type conversion."
+    },
+    {
+      "id": "conditionals",
+      "title": "Conditionals (if/elif/else)",
+      "level": "beginner",
+      "prerequisites": ["data_types"],
+      "description": "Master conditional statements to control program flow based on conditions."
+    },
+    {
+      "id": "loops",
+      "title": "Loops (for/while)",
+      "level": "beginner",
+      "prerequisites": ["conditionals"],
+      "description": "Learn to repeat code blocks with for and while loops. Understand loop control with break and continue."
+    },
+    {
+      "id": "functions",
+      "title": "Functions & Parameters",
+      "level": "beginner",
+      "prerequisites": ["loops"],
+      "description": "Write reusable code with functions. Learn about parameters, return values, and scope."
+    },
+    {
+      "id": "lists",
+      "title": "Lists & Indexing",
+      "level": "intermediate",
+      "prerequisites": ["functions"],
+      "description": "Work with lists: creation, indexing, slicing, and common list methods like append, remove, sort."
+    },
+    {
+      "id": "dicts",
+      "title": "Dictionaries & Key-Value Pairs",
+      "level": "intermediate",
+      "prerequisites": ["lists"],
+      "description": "Organize data with dictionaries. Learn key-value pairs, dictionary methods, and iteration patterns."
+    },
+    {
+      "id": "list_comprehensions",
+      "title": "List Comprehensions",
+      "level": "intermediate",
+      "prerequisites": ["lists"],
+      "description": "Write concise and efficient list transformations using list comprehension syntax."
+    },
+    {
+      "id": "classes",
+      "title": "Classes & Objects",
+      "level": "intermediate",
+      "prerequisites": ["functions"],
+      "description": "Create custom classes with attributes and methods. Understand instantiation and instance methods."
+    },
+    {
+      "id": "inheritance",
+      "title": "Inheritance & Polymorphism",
+      "level": "intermediate",
+      "prerequisites": ["classes"],
+      "description": "Build hierarchies with class inheritance. Use super() and override methods for polymorphic behavior."
+    },
+    {
+      "id": "exceptions",
+      "title": "Exception Handling",
+      "level": "intermediate",
+      "prerequisites": ["functions"],
+      "description": "Handle errors gracefully with try/except/finally blocks. Create custom exceptions."
+    },
+    {
+      "id": "file_io",
+      "title": "File I/O & File Operations",
+      "level": "intermediate",
+      "prerequisites": ["functions"],
+      "description": "Read and write files in Python. Work with file modes, context managers, and common file operations."
+    },
+    {
+      "id": "modules",
+      "title": "Modules & Imports",
+      "level": "intermediate",
+      "prerequisites": ["functions"],
+      "description": "Organize code with modules. Import built-in and custom modules to reuse code."
+    },
+    {
+      "id": "decorators",
+      "title": "Decorators & Meta-Programming",
+      "level": "advanced",
+      "prerequisites": ["functions", "classes"],
+      "description": "Master function decorators and class decorators. Write meta-programming patterns that modify behavior."
+    },
+    {
+      "id": "generators",
+      "title": "Generators & Iterators",
+      "level": "advanced",
+      "prerequisites": ["functions", "list_comprehensions"],
+      "description": "Write memory-efficient code with generators and yield. Understand lazy evaluation."
+    }
+  ]
+}
