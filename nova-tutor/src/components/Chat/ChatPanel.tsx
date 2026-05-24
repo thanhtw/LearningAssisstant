@@ -10,12 +10,14 @@ interface ChatPanelProps {
   messages: Message[];
   isStreaming?: boolean;
   onSendMessage: (content: string) => void;
+  onStopStreaming?: () => void;
 }
 
 export const ChatPanel: React.FC<ChatPanelProps> = ({
   messages,
   isStreaming = false,
   onSendMessage,
+  onStopStreaming,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -72,11 +74,16 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
           />
           <button
-            type="submit"
-            disabled={isStreaming || !inputValue.trim()}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-colors"
+            type={isStreaming ? 'button' : 'submit'}
+            onClick={isStreaming ? onStopStreaming : undefined}
+            disabled={!isStreaming && !inputValue.trim()}
+            className={`px-6 py-2 text-white rounded-lg transition-colors ${
+              isStreaming
+                ? 'bg-red-500 hover:bg-red-600'
+                : 'bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400'
+            }`}
           >
-            Send
+            {isStreaming ? 'Stop' : 'Send'}
           </button>
         </div>
       </form>

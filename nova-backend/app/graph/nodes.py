@@ -6,15 +6,42 @@ Implements interactive tutoring with Groq API and llama-3.3-70b-versatile
 from typing import Any, Literal
 import json
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from .state import LearnerState
+from app.debug import debug_log
 
-# Initialize Groq LLM client
-llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    temperature=0.7,
-    max_tokens=1024,
-)
+BASE_DIR = Path(__file__).resolve().parents[2]
+load_dotenv(BASE_DIR / ".env")
+
+
+def get_llm() -> ChatGroq:
+    """
+    Build the Groq client lazily so missing configuration surfaces at request time.
+    """
+    return ChatGroq(
+        model=os.getenv("MODEL", "llama-3.3-70b-versatile"),
+        temperature=0.7,
+        max_tokens=int(os.getenv("MAX_TOKENS", "1024")),
+        timeout=float(os.getenv("LLM_TIMEOUT", "20")),
+        max_retries=1,
+    )
+
+
+def invoke_llm_with_debug(prompt: str, node_name: str) -> str:
+    """
+    Invoke the LLM and print the prompt/response for debugging.
+    """
+    debug_log(f"\n===== LLM PROMPT ({node_name}) =====\n{prompt}\n")
+    try:
+        response = get_llm().invoke(prompt)
+        content = response.content if isinstance(response.content, str) else str(response.content)
+        debug_log(f"===== LLM RESPONSE ({node_name}) =====\n{content}\n")
+        return content
+    except Exception as exc:
+        debug_log(f"===== LLM ERROR ({node_name}) =====\n{exc}\n")
+        raise
 
 
 def router_node(state: LearnerState) -> Literal["introduce", "assess", "remediate", "celebrate", "teach"]:
@@ -27,8 +54,8 @@ def router_node(state: LearnerState) -> Literal["introduce", "assess", "remediat
     Returns:
         Next node name to execute
     """
-    # First interaction - introduce topic
-    if state["total_attempts"] == 0:
+    # First interaction - introduce topic before the assistant has replied once.
+    if not any(message.get("role") == "assistant" for message in state["messages"]):
         return "introduce"
     
     # In quiz mode - assess answer
@@ -76,8 +103,7 @@ End with one compelling question to start the learning.
 
 Keep it brief (2-3 sentences) and warm."""
 
-    response = llm.invoke(prompt)
-    introduction = response.content
+    introduction = invoke_llm_with_debug(prompt, "introduce")
     
     assistant_message = {
         "role": "assistant",
@@ -138,12 +164,11 @@ Evaluate in JSON format:
 
 Be kind and constructive. Celebrate progress!"""
 
-    response = llm.invoke(prompt)
-    
+    content = invoke_llm_with_debug(prompt, "assess")
+
     # Parse response
     try:
         # Extract JSON from response
-        content = response.content
         json_start = content.find('{')
         json_end = content.rfind('}') + 1
         evaluation = json.loads(content[json_start:json_end])
@@ -217,8 +242,7 @@ Provide a fresh explanation using:
 Never be condescending. Always be encouraging!
 Keep it brief (3-4 sentences)."""
 
-    response = llm.invoke(prompt)
-    remediation = response.content
+    remediation = invoke_llm_with_debug(prompt, "remediate")
     
     assistant_message = {
         "role": "assistant",
@@ -257,8 +281,7 @@ Write an enthusiastic, brief celebration (2-3 sentences) that:
 
 Be warm and encouraging!"""
 
-    response = llm.invoke(prompt)
-    celebration = response.content
+    celebration = invoke_llm_with_debug(prompt, "celebrate")
     
     assistant_message = {
         "role": "assistant",
@@ -293,8 +316,7 @@ Provide a clear, engaging explanation that:
 
 Make it interactive and warm!"""
 
-    response = llm.invoke(prompt)
-    explanation = response.content
+    explanation = invoke_llm_with_debug(prompt, "teach")
     
     assistant_message = {
         "role": "assistant",

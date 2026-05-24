@@ -3,10 +3,12 @@ FastAPI main application with CORS configuration and routes
 """
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables FIRST, before other imports
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parents[1]
+load_dotenv(BASE_DIR / ".env")
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

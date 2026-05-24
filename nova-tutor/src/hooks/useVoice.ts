@@ -28,6 +28,7 @@ export function useVoice(options: UseVoiceOptions = {}) {
 
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [hasSpokenText, setHasSpokenText] = useState(false);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
 
@@ -146,6 +147,7 @@ export function useVoice(options: UseVoiceOptions = {}) {
         };
 
         lastSpokenTextRef.current = text;
+        setHasSpokenText(Boolean(text.trim()));
         SpeechSynthesis.speak(utterance);
       });
     },
@@ -236,10 +238,13 @@ export function useVoice(options: UseVoiceOptions = {}) {
     // State
     isListening,
     isSpeaking,
+    hasSpokenText,
     availableVoices,
     selectedVoiceIndex,
     setSelectedVoiceIndex,
   };
 }
+
+export type UseVoiceResult = ReturnType<typeof useVoice>;
 
 export default useVoice;

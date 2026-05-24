@@ -3,21 +3,20 @@
  */
 
 import React, { useCallback } from 'react';
-import { useVoice } from '../../hooks/useVoice';
+import type { UseVoiceResult } from '../../hooks/useVoice';
 import './VoiceControls.css';
 
 interface VoiceControlsProps {
-  onTranscript?: (text: string) => void;
-  onSpeak?: (text: string) => void;
+  voice: UseVoiceResult;
 }
 
 export const VoiceControls: React.FC<VoiceControlsProps> = ({
-  onTranscript,
-  onSpeak,
+  voice,
 }) => {
   const {
     isListening,
     isSpeaking,
+    hasSpokenText,
     availableVoices,
     selectedVoiceIndex,
     setSelectedVoiceIndex,
@@ -25,7 +24,7 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
     stopListening,
     speak,
     replayLastSpoken,
-  } = useVoice({ onTranscript });
+  } = voice;
 
   const handleMicClick = useCallback(() => {
     if (isListening) {
@@ -36,8 +35,13 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
   }, [isListening, startListening, stopListening]);
 
   const handleSpeakerClick = useCallback(() => {
-    replayLastSpoken();
-  }, [replayLastSpoken]);
+    if (hasSpokenText) {
+      replayLastSpoken();
+      return;
+    }
+
+    void speak("Hello! I'm Nova, and your speaker test is working.");
+  }, [hasSpokenText, replayLastSpoken, speak]);
 
   const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const index = parseInt(e.target.value, 10);
@@ -71,7 +75,7 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
       <button
         onClick={handleSpeakerClick}
         className={`voice-button speaker-button ${isSpeaking ? 'active' : ''}`}
-        title="Replay last spoken text"
+        title={hasSpokenText ? 'Replay last spoken text' : 'Test speaker'}
         disabled={isListening}
         aria-label="Speaker"
       >

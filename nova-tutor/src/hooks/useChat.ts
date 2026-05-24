@@ -23,7 +23,6 @@ export function useChat(params: UseChatParams) {
 
   const messageIdRef = useRef(0);
   const abortStreamRef = useRef<(() => void) | null>(null);
-  const partialMessageIdRef = useRef<string | null>(null);
 
   const addMessage = useCallback((content: string, role: 'user' | 'assistant') => {
     const newMessage: Message = {
@@ -43,9 +42,34 @@ export function useChat(params: UseChatParams) {
 
   const updateLastMessage = useCallback((content: string) => {
     setState((prev) => {
-      if (prev.messages.length === 0) return prev;
+      if (prev.messages.length === 0) {
+        const newMessage: Message = {
+          id: `msg-${messageIdRef.current++}`,
+          content,
+          role: 'assistant',
+          timestamp: new Date(),
+        };
+
+        return {
+          ...prev,
+          messages: [...prev.messages, newMessage],
+        };
+      }
+
       const lastMsg = prev.messages[prev.messages.length - 1];
-      if (lastMsg.role !== 'assistant') return prev;
+      if (lastMsg.role !== 'assistant') {
+        const newMessage: Message = {
+          id: `msg-${messageIdRef.current++}`,
+          content,
+          role: 'assistant',
+          timestamp: new Date(),
+        };
+
+        return {
+          ...prev,
+          messages: [...prev.messages, newMessage],
+        };
+      }
       
       return {
         ...prev,
@@ -69,24 +93,6 @@ export function useChat(params: UseChatParams) {
         ...prev,
         isStreaming: true,
         error: null,
-      }));
-
-      // Create placeholder for assistant response
-      const placeholderId = `msg-${messageIdRef.current}`;
-      messageIdRef.current++;
-      partialMessageIdRef.current = placeholderId;
-      
-      setState((prev) => ({
-        ...prev,
-        messages: [
-          ...prev.messages,
-          {
-            id: placeholderId,
-            content: '',
-            role: 'assistant',
-            timestamp: new Date(),
-          },
-        ],
       }));
 
       let accumulatedText = '';
@@ -118,7 +124,9 @@ export function useChat(params: UseChatParams) {
         
         onDone: (fullText: string) => {
           // Ensure we have the complete text
-          updateLastMessage(fullText || accumulatedText);
+          if (fullText || accumulatedText) {
+            updateLastMessage(fullText || accumulatedText);
+          }
           setState((prev) => ({
             ...prev,
             isStreaming: false,
@@ -132,7 +140,11 @@ export function useChat(params: UseChatParams) {
             isStreaming: false,
             error,
           }));
-          addMessage(`Error: ${error}`, 'assistant');
+          if (accumulatedText) {
+            updateLastMessage(accumulatedText);
+          } else {
+            addMessage(`Error: ${error}`, 'assistant');
+          }
           abortStreamRef.current = null;
         },
       });
@@ -154,7 +166,6 @@ export function useChat(params: UseChatParams) {
       currentMood: 'happy',
     });
     messageIdRef.current = 0;
-    partialMessageIdRef.current = null;
   }, []);
 
   const clearError = useCallback(() => {

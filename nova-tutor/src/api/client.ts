@@ -5,6 +5,7 @@
 import { Mood } from '../components/Avatar/emotions';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const CHAT_REQUEST_TIMEOUT_MS = 30000;
 
 export interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean>;
@@ -69,6 +70,11 @@ export async function apiCall<T>(
  */
 export function streamChat(params: StreamChatParams): () => void {
   const controller = new AbortController();
+  let timedOut = false;
+  const timeoutId = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, CHAT_REQUEST_TIMEOUT_MS);
   
   const requestBody = {
     session_id: params.sessionId,
@@ -77,6 +83,8 @@ export function streamChat(params: StreamChatParams): () => void {
     level: params.level,
     character_name: params.characterName,
   };
+
+  console.log('[chat] sending request', requestBody);
 
   fetch(`${API_BASE_URL}/api/chat`, {
     method: 'POST',
@@ -87,6 +95,7 @@ export function streamChat(params: StreamChatParams): () => void {
     signal: controller.signal,
   })
     .then(async (response) => {
+      console.log('[chat] response status', response.status, response.statusText);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -120,12 +129,18 @@ export function streamChat(params: StreamChatParams): () => void {
                   const event = JSON.parse(dataStr);
                   
                   if (event.type === 'token') {
+                    console.log('[chat] token', event.content);
                     params.onToken(event.content);
+                  } else if (event.type === 'status') {
+                    console.log('[chat] status', event.message);
                   } else if (event.type === 'mood') {
+                    console.log('[chat] mood', event.mood);
                     params.onMood(event.mood);
                   } else if (event.type === 'done') {
+                    console.log('[chat] done', event.full_text);
                     params.onDone(event.full_text);
                   } else if (event.type === 'error') {
+                    console.error('[chat] error event', event.message);
                     params.onError(event.message);
                   }
                 } catch (e) {
@@ -136,17 +151,26 @@ export function streamChat(params: StreamChatParams): () => void {
           }
         }
       } finally {
+        window.clearTimeout(timeoutId);
         reader.releaseLock();
       }
     })
     .catch((error) => {
-      if (error.name !== 'AbortError') {
+      window.clearTimeout(timeoutId);
+      if (timedOut) {
+        console.error('[chat] timed out waiting for backend response');
+        params.onError('The tutor request timed out after 30 seconds.');
+      } else if (error.name !== 'AbortError') {
+        console.error('[chat] fetch failed', error);
         params.onError(error.message || 'Stream connection failed');
       }
     });
 
   // Return cleanup function
-  return () => controller.abort();
+  return () => {
+    window.clearTimeout(timeoutId);
+    controller.abort();
+  };
 }
 
 /**

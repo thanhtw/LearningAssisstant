@@ -13,6 +13,13 @@ import { Mood } from './types';
 import { get } from './api/client';
 import './index.css';
 
+interface SessionApiResponse {
+  topic?: string;
+  level?: string;
+  correct_answers?: number;
+  total_attempts?: number;
+}
+
 function generateSessionId(): string {
   return `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
@@ -40,13 +47,14 @@ function App() {
     correctAnswers: 0,
     totalAttempts: 0,
   });
+  const lastSpokenAssistantIdRef = useRef<string | null>(null);
 
   // Sync current mood to avatar
   useEffect(() => {
-    if (chat.currentMood && chat.currentMood !== character.emotion) {
+    if (chat.currentMood) {
       setEmotion(chat.currentMood as any);
     }
-  }, [chat.currentMood, character.emotion, setEmotion]);
+  }, [chat.currentMood, setEmotion]);
 
   // Voice integration
   const handleTranscript = (text: string) => {
@@ -59,12 +67,28 @@ function App() {
   };
 
   const voiceHook = useVoice({ onTranscript: handleTranscript });
+  const { speak } = voiceHook;
+
+  useEffect(() => {
+    if (chat.isStreaming) return;
+
+    const lastAssistantMessage = [...chat.messages]
+      .reverse()
+      .find((message) => message.role === 'assistant' && message.content.trim());
+
+    if (!lastAssistantMessage) return;
+    if (lastAssistantMessage.id === lastSpokenAssistantIdRef.current) return;
+    if (lastAssistantMessage.content.startsWith('Error:')) return;
+
+    lastSpokenAssistantIdRef.current = lastAssistantMessage.id;
+    void speak(lastAssistantMessage.content, chat.currentMood);
+  }, [chat.messages, chat.isStreaming, chat.currentMood, speak]);
 
   // Fetch session state on mount
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const sessionData = await get(`/api/session/${sessionId}`);
+        const sessionData = await get<SessionApiResponse>(`/api/session/${sessionId}`);
         if (sessionData) {
           setSelectedTopic(sessionData.topic || 'variables');
           setSelectedLevel(sessionData.level || 'beginner');
@@ -173,7 +197,7 @@ function App() {
 
           {/* Voice Controls */}
           <div className="border-t border-gray-200">
-            <VoiceControls onTranscript={handleTranscript} />
+            <VoiceControls voice={voiceHook} />
           </div>
         </div>
 
@@ -184,6 +208,7 @@ function App() {
             messages={chat.messages}
             isStreaming={chat.isStreaming}
             onSendMessage={chat.sendMessage}
+            onStopStreaming={chat.stopStreaming}
           />
           
           {/* Error Display */}
