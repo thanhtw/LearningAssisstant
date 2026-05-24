@@ -15,6 +15,12 @@ from app.debug import debug_log
 BASE_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(BASE_DIR / ".env")
 
+LANGUAGE_NAMES = {
+    "en": "English",
+    "zh-TW": "Traditional Chinese",
+    "vi": "Vietnamese",
+}
+
 
 def get_llm() -> ChatGroq:
     """
@@ -42,6 +48,20 @@ def invoke_llm_with_debug(prompt: str, node_name: str) -> str:
     except Exception as exc:
         debug_log(f"===== LLM ERROR ({node_name}) =====\n{exc}\n")
         raise
+
+
+def get_language_name(language: str) -> str:
+    """Map frontend language codes to tutor-friendly language names."""
+    return LANGUAGE_NAMES.get(language, "English")
+
+
+def get_language_instruction(language: str) -> str:
+    """Keep model responses aligned with the selected UI language."""
+    language_name = get_language_name(language)
+    return (
+        f"Respond entirely in {language_name}. "
+        "If you include code, keep the code in normal programming syntax and explain it in the selected language."
+    )
 
 
 def router_node(state: LearnerState) -> Literal["introduce", "assess", "remediate", "celebrate", "teach"]:
@@ -93,6 +113,7 @@ def introduce_node(state: LearnerState) -> dict[str, Any]:
         "intermediate": "relatable, practical examples",
         "advanced": "sophisticated concepts and connections",
     }
+    language_instruction = get_language_instruction(state["language"])
     
     prompt = f"""You are {state['character_name']}, an enthusiastic AI tutor.
 
@@ -100,6 +121,7 @@ Introduce the topic: {state['topic']} for a {state['level']} learner.
 
 Use {level_guidance.get(state['level'], 'clear examples')} and an analogy to make it engaging.
 End with one compelling question to start the learning.
+{language_instruction}
 
 Keep it brief (2-3 sentences) and warm."""
 
@@ -148,21 +170,27 @@ def assess_node(state: LearnerState) -> dict[str, Any]:
         f"{msg['role'].upper()}: {msg['content']}"
         for msg in state["messages"][-4:]  # Last 4 messages for context
     ])
+    language_name = get_language_name(state["language"])
     
     prompt = f"""You are {state['character_name']}, evaluating a student's answer.
 
 Topic: {state['topic']}
 Level: {state['level']}
+Recent conversation:
+{conversation}
 Student's answer: {last_user_message}
 
-Evaluate in JSON format:
+Return valid JSON in this exact shape:
 {{
   "verdict": "correct" | "partial" | "incorrect",
   "misconception": "string describing error or null",
   "feedback": "warm, encouraging feedback in character (1-2 sentences)"
 }}
 
-Be kind and constructive. Celebrate progress!"""
+Rules:
+- Keep "verdict" in English using only correct, partial, or incorrect.
+- Write "feedback" and "misconception" in {language_name}.
+- Be kind and constructive. Celebrate progress!"""
 
     content = invoke_llm_with_debug(prompt, "assess")
 
@@ -226,6 +254,7 @@ def remediate_node(state: LearnerState) -> dict[str, Any]:
         Updated state with re-explanation and return to quiz mode
     """
     misconceptions_text = ", ".join(state["misconceptions"]) if state["misconceptions"] else "general confusion"
+    language_instruction = get_language_instruction(state["language"])
     
     prompt = f"""You are {state['character_name']}, re-teaching a concept.
 
@@ -238,6 +267,7 @@ Provide a fresh explanation using:
 - Simpler language if needed
 - Clear steps or examples
 - End with a supportive question to check understanding
+{language_instruction}
 
 Never be condescending. Always be encouraging!
 Keep it brief (3-4 sentences)."""
@@ -267,6 +297,7 @@ def celebrate_node(state: LearnerState) -> dict[str, Any]:
         Updated state with celebration and congratulations
     """
     accuracy = state["correct_answers"] / max(state["total_attempts"], 1) * 100
+    language_instruction = get_language_instruction(state["language"])
     
     prompt = f"""You are {state['character_name']}, celebrating a student's success!
 
@@ -278,6 +309,7 @@ Write an enthusiastic, brief celebration (2-3 sentences) that:
 1. Praises their achievement genuinely
 2. Acknowledges their effort
 3. Suggests a related next topic to explore
+{language_instruction}
 
 Be warm and encouraging!"""
 
@@ -304,6 +336,8 @@ def teach_node(state: LearnerState) -> dict[str, Any]:
     Returns:
         Updated state with explanation
     """
+    language_instruction = get_language_instruction(state["language"])
+
     prompt = f"""You are {state['character_name']}, explaining a concept.
 
 Topic: {state['topic']}
@@ -313,6 +347,7 @@ Provide a clear, engaging explanation that:
 1. Uses examples appropriate for {state['level']} learners
 2. Is concise (2-3 sentences)
 3. Ends with a question to deepen understanding
+{language_instruction}
 
 Make it interactive and warm!"""
 

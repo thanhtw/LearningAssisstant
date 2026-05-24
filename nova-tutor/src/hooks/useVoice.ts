@@ -5,6 +5,12 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Mood } from '../components/Avatar/emotions';
+import {
+  AppLanguage,
+  DEFAULT_LANGUAGE,
+  getSpeechLocale,
+  getVoiceLanguagePrefixes,
+} from '../i18n/config';
 
 declare global {
   interface Window {
@@ -21,33 +27,45 @@ const SpeechSynthesis = typeof window !== 'undefined' ? window.speechSynthesis :
 
 interface UseVoiceOptions {
   onTranscript?: (text: string) => void;
+  language?: AppLanguage;
 }
 
 export function useVoice(options: UseVoiceOptions = {}) {
-  const { onTranscript } = options;
+  const {
+    onTranscript,
+    language = DEFAULT_LANGUAGE,
+  } = options;
 
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasSpokenText, setHasSpokenText] = useState(false);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
+  const [hasMatchingVoice, setHasMatchingVoice] = useState(false);
 
   const recognitionRef = useRef<any>(null);
   const lastSpokenTextRef = useRef<string>('');
+  const speechLocale = getSpeechLocale(language);
 
   /**
-   * Load available voices and filter to English
+   * Load available voices and prefer ones that match the selected language.
    */
   useEffect(() => {
     if (!SpeechSynthesis) return;
 
     const loadVoices = () => {
       const voices = SpeechSynthesis.getVoices();
-      const englishVoices = voices.filter((voice: SpeechSynthesisVoice) =>
-        voice.lang.startsWith('en')
+      const voicePrefixes = getVoiceLanguagePrefixes(language);
+      const matchingVoices = voices.filter((voice: SpeechSynthesisVoice) =>
+        voicePrefixes.some((prefix) => voice.lang.toLowerCase().startsWith(prefix))
       );
-      setAvailableVoices(englishVoices);
-      if (englishVoices.length > 0 && selectedVoiceIndex >= englishVoices.length) {
+      const nextVoices = matchingVoices;
+
+      setAvailableVoices(nextVoices);
+      setHasMatchingVoice(nextVoices.length > 0);
+      if (nextVoices.length === 0) {
+        setSelectedVoiceIndex(0);
+      } else if (selectedVoiceIndex >= nextVoices.length) {
         setSelectedVoiceIndex(0);
       }
     };
@@ -61,7 +79,7 @@ export function useVoice(options: UseVoiceOptions = {}) {
     return () => {
       SpeechSynthesis.onvoiceschanged = null;
     };
-  }, []);
+  }, [language, selectedVoiceIndex]);
 
   /**
    * Mood-based pitch and rate configuration
@@ -125,9 +143,11 @@ export function useVoice(options: UseVoiceOptions = {}) {
         utterance.pitch = settings.pitch;
         utterance.rate = settings.rate;
         utterance.volume = 1;
+        utterance.lang = speechLocale;
 
-        // Set voice if available
-        if (availableVoices.length > 0) {
+        // Only pin a specific voice when it matches the selected language.
+        // Otherwise let the browser choose its best voice for utterance.lang.
+        if (hasMatchingVoice && availableVoices.length > 0) {
           utterance.voice = availableVoices[selectedVoiceIndex] || availableVoices[0];
         }
 
@@ -151,7 +171,7 @@ export function useVoice(options: UseVoiceOptions = {}) {
         SpeechSynthesis.speak(utterance);
       });
     },
-    [availableVoices, selectedVoiceIndex]
+    [availableVoices, hasMatchingVoice, selectedVoiceIndex, speechLocale]
   );
 
   /**
@@ -172,7 +192,7 @@ export function useVoice(options: UseVoiceOptions = {}) {
 
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = speechLocale;
 
     let interimTranscript = '';
 
@@ -207,7 +227,7 @@ export function useVoice(options: UseVoiceOptions = {}) {
     };
 
     recognition.start();
-  }, [onTranscript]);
+  }, [onTranscript, speechLocale]);
 
   /**
    * Stop listening
@@ -239,6 +259,7 @@ export function useVoice(options: UseVoiceOptions = {}) {
     isListening,
     isSpeaking,
     hasSpokenText,
+    hasMatchingVoice,
     availableVoices,
     selectedVoiceIndex,
     setSelectedVoiceIndex,

@@ -16,6 +16,7 @@ export interface StreamChatParams {
   message: string;
   topic: string;
   level: string;
+  language: string;
   characterName: string;
   onToken: (text: string) => void;
   onMood: (mood: Mood) => void;
@@ -81,6 +82,7 @@ export function streamChat(params: StreamChatParams): () => void {
     message: params.message,
     topic: params.topic,
     level: params.level,
+    language: params.language,
     character_name: params.characterName,
   };
 

@@ -1,6 +1,7 @@
 {
   "common": {
     "language": "Language",
+    "dismiss": "Dismiss",
     "english": "English",
     "traditionalChinese": "繁體中文",
     "vietnamese": "Tiếng Việt"
@@ -24,8 +25,11 @@
     "stopListening": "Stop listening",
     "replayLastSpoken": "Replay last spoken text",
     "testSpeaker": "Test speaker",
-    "listeningIndicator": "🎤 Listening",
-    "speakingIndicator": "🔊 Speaking",
+    "selectVoice": "Select voice",
+    "defaultVoiceSuffix": "(default)",
+    "systemVoiceFallback": "Using the browser's system voice for this language.",
+    "listeningIndicator": "Listening",
+    "speakingIndicator": "Speaking",
     "readyIndicator": "Ready",
     "speakerTestMessage": "Hello! I'm Nova, and your speaker test is working."
   },
@@ -56,5 +60,9 @@
     "confused": "confused",
     "sad": "sad",
     "neutral": "neutral"
+  },
+  "footer": {
+    "thinking": "Nova is thinking...",
+    "idle": "Ask questions or use voice commands to learn"
   }
 }

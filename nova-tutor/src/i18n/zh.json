@@ -1,6 +1,7 @@
 {
   "common": {
     "language": "語言",
+    "dismiss": "關閉",
     "english": "English",
     "traditionalChinese": "繁體中文",
     "vietnamese": "Tiếng Việt"
@@ -16,24 +17,27 @@
     "stop": "停止"
   },
   "session": {
-    "label": "課程:",
-    "correct": "正確:"
+    "label": "課程：",
+    "correct": "正確："
   },
   "voice": {
     "startListening": "開始聆聽",
     "stopListening": "停止聆聽",
     "replayLastSpoken": "重播最後的語音",
     "testSpeaker": "測試揚聲器",
-    "listeningIndicator": "🎤 聆聽中",
-    "speakingIndicator": "🔊 說話中",
+    "selectVoice": "選擇語音",
+    "defaultVoiceSuffix": "(預設)",
+    "systemVoiceFallback": "目前使用瀏覽器的系統語音來播放此語言。",
+    "listeningIndicator": "聆聽中",
+    "speakingIndicator": "播放中",
     "readyIndicator": "準備就緒",
-    "speakerTestMessage": "你好!我是 Nova,你的揚聲器測試正常。"
+    "speakerTestMessage": "你好！我是 Nova，你的揚聲器測試正常。"
   },
   "controls": {
     "topic": "主題",
     "level": "級別",
     "testEmotions": "測試情緒",
-    "mood": "心情:"
+    "mood": "心情："
   },
   "topics": {
     "variables": "變數",
@@ -56,5 +60,9 @@
     "confused": "困惑",
     "sad": "難過",
     "neutral": "中立"
+  },
+  "footer": {
+    "thinking": "Nova 正在思考中...",
+    "idle": "提出問題或使用語音指令來學習"
   }
 }

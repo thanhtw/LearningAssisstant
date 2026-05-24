@@ -20,6 +20,7 @@ class LearnerState(TypedDict):
         mode: Current interaction mode ("explain" | "quiz" | "hint" | "celebrate")
         mood: Character mood state
         character_name: Name of the AI tutor character
+        language: Preferred response language code
         session_id: Unique session identifier
     """
     
@@ -32,4 +33,5 @@ class LearnerState(TypedDict):
     mode: str
     mood: str
     character_name: str
+    language: str
     session_id: str

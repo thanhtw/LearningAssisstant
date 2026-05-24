@@ -3,6 +3,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { UseVoiceResult } from '../../hooks/useVoice';
 import './VoiceControls.css';
 
@@ -13,10 +14,12 @@ interface VoiceControlsProps {
 export const VoiceControls: React.FC<VoiceControlsProps> = ({
   voice,
 }) => {
+  const { t } = useTranslation();
   const {
     isListening,
     isSpeaking,
     hasSpokenText,
+    hasMatchingVoice,
     availableVoices,
     selectedVoiceIndex,
     setSelectedVoiceIndex,
@@ -40,8 +43,8 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
       return;
     }
 
-    void speak("Hello! I'm Nova, and your speaker test is working.");
-  }, [hasSpokenText, replayLastSpoken, speak]);
+    void speak(t('voice.speakerTestMessage'));
+  }, [hasSpokenText, replayLastSpoken, speak, t]);
 
   const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const index = parseInt(e.target.value, 10);
@@ -54,9 +57,9 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
       <button
         onClick={handleMicClick}
         className={`voice-button mic-button ${isListening ? 'active' : ''}`}
-        title={isListening ? 'Stop listening' : 'Start listening'}
+        title={isListening ? t('voice.stopListening') : t('voice.startListening')}
         disabled={isSpeaking}
-        aria-label="Microphone"
+        aria-label={isListening ? t('voice.stopListening') : t('voice.startListening')}
       >
         <svg
           className="w-6 h-6"
@@ -75,9 +78,9 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
       <button
         onClick={handleSpeakerClick}
         className={`voice-button speaker-button ${isSpeaking ? 'active' : ''}`}
-        title={hasSpokenText ? 'Replay last spoken text' : 'Test speaker'}
+        title={hasSpokenText ? t('voice.replayLastSpoken') : t('voice.testSpeaker')}
         disabled={isListening}
-        aria-label="Speaker"
+        aria-label={hasSpokenText ? t('voice.replayLastSpoken') : t('voice.testSpeaker')}
       >
         <svg
           className="w-6 h-6"
@@ -94,15 +97,21 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
           value={selectedVoiceIndex}
           onChange={handleVoiceChange}
           className="voice-selector"
-          title="Select voice"
+          title={t('voice.selectVoice')}
           disabled={isListening || isSpeaking}
         >
           {availableVoices.map((voice, index) => (
             <option key={index} value={index}>
-              {voice.name} {voice.default ? '(default)' : ''}
+              {voice.name} {voice.default ? t('voice.defaultVoiceSuffix') : ''}
             </option>
           ))}
         </select>
+      )}
+
+      {!hasMatchingVoice && (
+        <p className="text-xs text-slate-500 text-center px-2">
+          {t('voice.systemVoiceFallback')}
+        </p>
       )}
 
       {/* Speaking Indicator */}
@@ -110,7 +119,7 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
         {isListening && (
           <span className="listening-indicator">
             <span className="listening-dot"></span>
-            🎤 Listening
+            {t('voice.listeningIndicator')}
           </span>
         )}
         {isSpeaking && (
@@ -120,11 +129,11 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
               <span className="dot"></span>
               <span className="dot"></span>
             </span>
-            🔊 Speaking
+            {t('voice.speakingIndicator')}
           </span>
         )}
         {!isListening && !isSpeaking && (
-          <span className="idle-indicator">Ready</span>
+          <span className="idle-indicator">{t('voice.readyIndicator')}</span>
         )}
       </div>
     </div>

@@ -22,6 +22,7 @@ class ChatRequest(BaseModel):
     message: str = Field(..., description="User message")
     topic: Optional[str] = Field("general", description="Learning topic")
     level: Optional[str] = Field("beginner", description="Difficulty level")
+    language: Optional[str] = Field("en", description="Preferred response language")
     character_name: Optional[str] = Field("Nova", description="Tutor character name")
 
 
@@ -29,6 +30,7 @@ class ChatResponse(BaseModel):
     """Response model for chat endpoint"""
     session_id: str
     message: str
+    language: str = Field(description="Selected response language")
     mood: str = Field(description="Character mood")
     mode: str = Field(description="Interaction mode")
     correct_answers: int
@@ -40,6 +42,7 @@ class SessionRequest(BaseModel):
     """Request to create or get session"""
     topic: str = Field(..., description="Learning topic")
     level: str = Field("beginner", description="Difficulty level")
+    language: str = Field("en", description="Preferred response language")
     character_name: str = Field("Nova", description="Tutor character name")
 
 
@@ -48,6 +51,7 @@ class SessionResponse(BaseModel):
     session_id: str
     topic: str
     level: str
+    language: str
     character_name: str
     correct_answers: int
     total_attempts: int

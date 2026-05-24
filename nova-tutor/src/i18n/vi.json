@@ -1,6 +1,7 @@
 {
   "common": {
     "language": "Ngôn ngữ",
+    "dismiss": "Đóng",
     "english": "English",
     "traditionalChinese": "繁體中文",
     "vietnamese": "Tiếng Việt"
@@ -24,8 +25,11 @@
     "stopListening": "Dừng lắng nghe",
     "replayLastSpoken": "Phát lại văn bản nói cuối cùng",
     "testSpeaker": "Kiểm tra loa",
-    "listeningIndicator": "🎤 Đang lắng nghe",
-    "speakingIndicator": "🔊 Đang phát biểu",
+    "selectVoice": "Chọn giọng đọc",
+    "defaultVoiceSuffix": "(mặc định)",
+    "systemVoiceFallback": "Đang dùng giọng hệ thống của trình duyệt cho ngôn ngữ này.",
+    "listeningIndicator": "Đang lắng nghe",
+    "speakingIndicator": "Đang nói",
     "readyIndicator": "Sẵn sàng",
     "speakerTestMessage": "Xin chào! Tôi là Nova, và kiểm tra loa của bạn hoạt động bình thường."
   },
@@ -51,10 +55,14 @@
   },
   "emotions": {
     "happy": "vui",
-    "excited": "h興奮",
+    "excited": "hào hứng",
     "thinking": "suy nghĩ",
     "confused": "bối rối",
     "sad": "buồn",
     "neutral": "trung lập"
+  },
+  "footer": {
+    "thinking": "Nova đang suy nghĩ...",
+    "idle": "Hãy đặt câu hỏi hoặc dùng giọng nói để học"
   }
 }

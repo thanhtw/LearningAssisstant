@@ -10,6 +10,7 @@ export interface UseChatParams {
   sessionId: string;
   topic: string;
   level?: string;
+  language: string;
   characterName?: string;
 }
 
@@ -108,6 +109,7 @@ export function useChat(params: UseChatParams) {
         message: content,
         topic: params.topic,
         level: params.level || 'beginner',
+        language: params.language,
         characterName: params.characterName || 'Nova',
         
         onToken: (text: string) => {
@@ -149,7 +151,7 @@ export function useChat(params: UseChatParams) {
         },
       });
     },
-    [params.sessionId, params.topic, params.level, params.characterName, addMessage, updateLastMessage]
+    [params.sessionId, params.topic, params.level, params.language, params.characterName, addMessage, updateLastMessage]
   );
 
   const clearHistory = useCallback(() => {

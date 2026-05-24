@@ -20,7 +20,14 @@ router = APIRouter(tags=["chat"])
 sessions: Dict[str, dict] = {}
 
 
-async def stream_chat(session_id: str, message: str, topic: str, level: str, character_name: str) -> AsyncGenerator[str, None]:
+async def stream_chat(
+    session_id: str,
+    message: str,
+    topic: str,
+    level: str,
+    language: str,
+    character_name: str,
+) -> AsyncGenerator[str, None]:
     """
     Generator function for streaming chat responses with SSE.
     Parses [MOOD:xxx] tags from Claude responses and sends SSE events.
@@ -30,6 +37,7 @@ async def stream_chat(session_id: str, message: str, topic: str, level: str, cha
         message: User's input message
         topic: Topic being learned
         level: Learning level (beginner, intermediate, advanced)
+        language: Preferred response language
         character_name: Character name for the session
         
     Yields:
@@ -41,6 +49,7 @@ async def stream_chat(session_id: str, message: str, topic: str, level: str, cha
             f"session_id={session_id}\n"
             f"topic={topic}\n"
             f"level={level}\n"
+            f"language={language}\n"
             f"character_name={character_name}\n"
             f"message={message}\n"
         )
@@ -60,11 +69,18 @@ async def stream_chat(session_id: str, message: str, topic: str, level: str, cha
                 "mode": "explain",
                 "mood": "happy",
                 "character_name": character_name,
+                "language": language,
                 "session_id": session_id,
                 "created_at": datetime.utcnow(),
             }
         
         session = sessions[session_id]
+        session.update({
+            "topic": topic,
+            "level": level,
+            "language": language,
+            "character_name": character_name,
+        })
         
         # Add user message
         user_message = {
@@ -84,6 +100,7 @@ async def stream_chat(session_id: str, message: str, topic: str, level: str, cha
             "mode": session["mode"],
             "mood": session["mood"],
             "character_name": session["character_name"],
+            "language": session["language"],
             "session_id": session_id,
         }
 
@@ -108,7 +125,9 @@ async def stream_chat(session_id: str, message: str, topic: str, level: str, cha
             "correct_answers": final_state.get("correct_answers", session["correct_answers"]),
             "total_attempts": final_state.get("total_attempts", session["total_attempts"]),
             "misconceptions": final_state.get("misconceptions", session["misconceptions"]),
+            "topic": session["topic"],
             "level": final_state.get("level", session["level"]),
+            "language": session["language"],
             "messages": final_messages,
         })
 
@@ -136,7 +155,7 @@ async def chat(request: ChatRequest):
     Streaming chat endpoint - process user message and stream tutor response with SSE.
     
     Args:
-        request: ChatRequest with session_id, message, topic, level, character_name
+        request: ChatRequest with session_id, message, topic, level, language, character_name
         
     Returns:
         StreamingResponse with SSE events containing tokens, mood updates, and completion
@@ -146,6 +165,7 @@ async def chat(request: ChatRequest):
         f"session_id={request.session_id}\n"
         f"topic={request.topic}\n"
         f"level={request.level}\n"
+        f"language={request.language}\n"
     )
     return StreamingResponse(
         stream_chat(
@@ -153,6 +173,7 @@ async def chat(request: ChatRequest):
             message=request.message,
             topic=request.topic,
             level=request.level,
+            language=request.language or "en",
             character_name=request.character_name,
         ),
         media_type="text/event-stream",
@@ -189,6 +210,7 @@ async def get_session(session_id: str) -> Dict:
         "session_id": session_id,
         "topic": session["topic"],
         "level": session["level"],
+        "language": session.get("language", "en"),
         "character_name": session["character_name"],
         "correct_answers": session["correct_answers"],
         "total_attempts": session["total_attempts"],
