@@ -1,0 +1,60 @@
+{
+  "common": {
+    "language": "Language",
+    "english": "English",
+    "traditionalChinese": "繁體中文",
+    "vietnamese": "Tiếng Việt"
+  },
+  "header": {
+    "title": "Nova Tutor",
+    "subtitle": "Your AI Learning Assistant"
+  },
+  "chat": {
+    "placeholder": "Type your message...",
+    "messagePlaceholder": "Start a conversation with Nova Tutor...",
+    "send": "Send",
+    "stop": "Stop"
+  },
+  "session": {
+    "label": "Session:",
+    "correct": "Correct:"
+  },
+  "voice": {
+    "startListening": "Start listening",
+    "stopListening": "Stop listening",
+    "replayLastSpoken": "Replay last spoken text",
+    "testSpeaker": "Test speaker",
+    "listeningIndicator": "🎤 Listening",
+    "speakingIndicator": "🔊 Speaking",
+    "readyIndicator": "Ready",
+    "speakerTestMessage": "Hello! I'm Nova, and your speaker test is working."
+  },
+  "controls": {
+    "topic": "Topic",
+    "level": "Level",
+    "testEmotions": "Test Emotions",
+    "mood": "Mood:"
+  },
+  "topics": {
+    "variables": "Variables",
+    "dataTypes": "Data Types",
+    "conditionals": "Conditionals",
+    "loops": "Loops",
+    "functions": "Functions",
+    "lists": "Lists",
+    "dictionaries": "Dictionaries"
+  },
+  "levels": {
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced"
+  },
+  "emotions": {
+    "happy": "happy",
+    "excited": "excited",
+    "thinking": "thinking",
+    "confused": "confused",
+    "sad": "sad",
+    "neutral": "neutral"
+  }
+}

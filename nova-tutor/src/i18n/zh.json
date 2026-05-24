@@ -1,0 +1,60 @@
+{
+  "common": {
+    "language": "語言",
+    "english": "English",
+    "traditionalChinese": "繁體中文",
+    "vietnamese": "Tiếng Việt"
+  },
+  "header": {
+    "title": "Nova 家教",
+    "subtitle": "您的 AI 學習助手"
+  },
+  "chat": {
+    "placeholder": "輸入您的訊息...",
+    "messagePlaceholder": "與 Nova 家教開始對話...",
+    "send": "發送",
+    "stop": "停止"
+  },
+  "session": {
+    "label": "課程:",
+    "correct": "正確:"
+  },
+  "voice": {
+    "startListening": "開始聆聽",
+    "stopListening": "停止聆聽",
+    "replayLastSpoken": "重播最後的語音",
+    "testSpeaker": "測試揚聲器",
+    "listeningIndicator": "🎤 聆聽中",
+    "speakingIndicator": "🔊 說話中",
+    "readyIndicator": "準備就緒",
+    "speakerTestMessage": "你好!我是 Nova,你的揚聲器測試正常。"
+  },
+  "controls": {
+    "topic": "主題",
+    "level": "級別",
+    "testEmotions": "測試情緒",
+    "mood": "心情:"
+  },
+  "topics": {
+    "variables": "變數",
+    "dataTypes": "資料類型",
+    "conditionals": "條件陳述",
+    "loops": "迴圈",
+    "functions": "函式",
+    "lists": "列表",
+    "dictionaries": "字典"
+  },
+  "levels": {
+    "beginner": "初級",
+    "intermediate": "中級",
+    "advanced": "進階"
+  },
+  "emotions": {
+    "happy": "開心",
+    "excited": "興奮",
+    "thinking": "思考中",
+    "confused": "困惑",
+    "sad": "難過",
+    "neutral": "中立"
+  }
+}

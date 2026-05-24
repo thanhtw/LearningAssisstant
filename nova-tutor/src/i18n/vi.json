@@ -1,0 +1,60 @@
+{
+  "common": {
+    "language": "Ngôn ngữ",
+    "english": "English",
+    "traditionalChinese": "繁體中文",
+    "vietnamese": "Tiếng Việt"
+  },
+  "header": {
+    "title": "Nova Tutor",
+    "subtitle": "Trợ lý Học tập AI của bạn"
+  },
+  "chat": {
+    "placeholder": "Nhập tin nhắn của bạn...",
+    "messagePlaceholder": "Bắt đầu cuộc trò chuyện với Nova Tutor...",
+    "send": "Gửi",
+    "stop": "Dừng"
+  },
+  "session": {
+    "label": "Phiên:",
+    "correct": "Đúng:"
+  },
+  "voice": {
+    "startListening": "Bắt đầu lắng nghe",
+    "stopListening": "Dừng lắng nghe",
+    "replayLastSpoken": "Phát lại văn bản nói cuối cùng",
+    "testSpeaker": "Kiểm tra loa",
+    "listeningIndicator": "🎤 Đang lắng nghe",
+    "speakingIndicator": "🔊 Đang phát biểu",
+    "readyIndicator": "Sẵn sàng",
+    "speakerTestMessage": "Xin chào! Tôi là Nova, và kiểm tra loa của bạn hoạt động bình thường."
+  },
+  "controls": {
+    "topic": "Chủ đề",
+    "level": "Cấp độ",
+    "testEmotions": "Kiểm tra Cảm xúc",
+    "mood": "Tâm trạng:"
+  },
+  "topics": {
+    "variables": "Biến",
+    "dataTypes": "Kiểu Dữ liệu",
+    "conditionals": "Câu lệnh Điều kiện",
+    "loops": "Vòng lặp",
+    "functions": "Hàm",
+    "lists": "Danh sách",
+    "dictionaries": "Từ điển"
+  },
+  "levels": {
+    "beginner": "Người mới bắt đầu",
+    "intermediate": "Trung bình",
+    "advanced": "Nâng cao"
+  },
+  "emotions": {
+    "happy": "vui",
+    "excited": "h興奮",
+    "thinking": "suy nghĩ",
+    "confused": "bối rối",
+    "sad": "buồn",
+    "neutral": "trung lập"
+  }
+}
