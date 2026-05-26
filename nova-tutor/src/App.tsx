@@ -142,6 +142,14 @@ function App() {
   }, [sessionId]);
 
   const testEmotions: Mood[] = ['happy', 'excited', 'thinking', 'confused', 'sad', 'neutral'];
+  const localizedTopicOptions = TOPIC_OPTIONS.map((topic) => ({
+    value: topic.value,
+    label: t(topic.labelKey),
+  }));
+  const selectedTopicLabel = localizedTopicOptions.find((topic) => topic.value === selectedTopic)?.label || t('topics.variables');
+  const selectedLevelLabel = t(
+    LEVEL_OPTIONS.find((level) => level.value === selectedLevel)?.labelKey || 'levels.beginner'
+  );
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-blue-50 to-indigo-100">
@@ -256,6 +264,11 @@ function App() {
           <ChatPanel
             messages={chat.messages}
             isStreaming={chat.isStreaming}
+            selectedTopic={selectedTopic}
+            selectedTopicLabel={selectedTopicLabel}
+            selectedLevelLabel={selectedLevelLabel}
+            topicOptions={localizedTopicOptions}
+            onTopicSelect={setSelectedTopic}
             onSendMessage={chat.sendMessage}
             onStopStreaming={chat.stopStreaming}
           />

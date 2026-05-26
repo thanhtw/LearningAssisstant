@@ -14,6 +14,11 @@ export interface UseChatParams {
   characterName?: string;
 }
 
+export interface SendMessageOverrides {
+  topic?: string;
+  level?: string;
+}
+
 export function useChat(params: UseChatParams) {
   const [state, setState] = useState<ChatState>({
     messages: [],
@@ -83,7 +88,7 @@ export function useChat(params: UseChatParams) {
   }, []);
 
   const sendMessage = useCallback(
-    async (content: string) => {
+    async (content: string, overrides: SendMessageOverrides = {}) => {
       if (!content.trim()) return;
 
       // Add user message
@@ -107,8 +112,8 @@ export function useChat(params: UseChatParams) {
       abortStreamRef.current = streamChat({
         sessionId: params.sessionId,
         message: content,
-        topic: params.topic,
-        level: params.level || 'beginner',
+        topic: overrides.topic || params.topic,
+        level: overrides.level || params.level || 'beginner',
         language: params.language,
         characterName: params.characterName || 'Nova',
         

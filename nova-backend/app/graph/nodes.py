@@ -1,6 +1,12 @@
 """
-LangGraph node functions for the learning workflow
-Implements interactive tutoring with Groq API and llama-3.3-70b-versatile
+LangGraph node functions for the learning workflow.
+
+The lesson design is intentionally learner-centered:
+- introduce the topic warmly
+- ask what the learner already knows or wants help with
+- teach one key idea at a time
+- ask a checkpoint question
+- respond to answers with feedback, correction, and the next step
 """
 
 from typing import Any, Literal
@@ -64,7 +70,56 @@ def get_language_instruction(language: str) -> str:
     )
 
 
-def router_node(state: LearnerState) -> Literal["introduce", "assess", "remediate", "celebrate", "teach"]:
+def get_last_user_message(state: LearnerState) -> str:
+    """Return the most recent learner message."""
+    for message in reversed(state["messages"]):
+        if message.get("role") == "user":
+            return message.get("content", "")
+    return ""
+
+
+def get_recent_conversation(state: LearnerState, limit: int = 6) -> str:
+    """Format recent conversation turns for prompt context."""
+    return "\n".join(
+        f"{message['role'].upper()}: {message['content']}"
+        for message in state["messages"][-limit:]
+    )
+
+
+def join_sections(*sections: str) -> str:
+    """Join non-empty response sections with learner-friendly spacing."""
+    cleaned_sections = [section.strip() for section in sections if section and section.strip()]
+    return "\n\n".join(cleaned_sections)
+
+
+def learner_requested_help(message: str) -> bool:
+    """Detect when the learner is asking for another explanation instead of answering."""
+    normalized = message.strip().lower()
+    help_markers = [
+        "help",
+        "hint",
+        "explain",
+        "i don't understand",
+        "i do not understand",
+        "can you explain",
+        "what does this mean",
+        "confused",
+        "不懂",
+        "不明白",
+        "請解釋",
+        "解释",
+        "解釋",
+        "可以再說",
+        "再說明",
+        "không hiểu",
+        "giải thích",
+        "gợi ý",
+        "giúp",
+    ]
+    return any(marker in normalized for marker in help_markers)
+
+
+def router_node(state: LearnerState) -> Literal["introduce", "plan", "assess", "celebrate", "teach"]:
     """
     Route to the appropriate node based on student state.
     
@@ -77,36 +132,32 @@ def router_node(state: LearnerState) -> Literal["introduce", "assess", "remediat
     # First interaction - introduce topic before the assistant has replied once.
     if not any(message.get("role") == "assistant" for message in state["messages"]):
         return "introduce"
-    
-    # In quiz mode - assess answer
-    if state["mode"] == "quiz":
-        return "assess"
-    
-    # Low accuracy with multiple attempts - remediate
-    accuracy = state["correct_answers"] / max(state["total_attempts"], 1)
-    if accuracy < 0.4 and state["total_attempts"] > 2:
-        return "remediate"
-    
+
+    if state["mode"] == "goal_check":
+        return "plan"
+
     # Mastery achieved - celebrate
     if state["correct_answers"] >= 3:
         return "celebrate"
-    
+
+    if state["mode"] == "quiz":
+        if learner_requested_help(get_last_user_message(state)):
+            return "teach"
+        return "assess"
+
     # Default - teach/explain
     return "teach"
 
 
 def introduce_node(state: LearnerState) -> dict[str, Any]:
     """
-    Introduce the topic with an engaging opening.
-    
-    Calls Claude to create an introduction with an analogy
-    suited to the student's level, ending with a question.
+    Introduce the topic and invite the learner to share their starting point.
     
     Args:
         state: Current LearnerState
         
     Returns:
-        Updated state with assistant introduction and quiz mode
+        Updated state with assistant introduction and learner goal check
     """
     level_guidance = {
         "beginner": "very simple, everyday analogies",
@@ -115,15 +166,18 @@ def introduce_node(state: LearnerState) -> dict[str, Any]:
     }
     language_instruction = get_language_instruction(state["language"])
     
-    prompt = f"""You are {state['character_name']}, an enthusiastic AI tutor.
+    prompt = f"""You are {state['character_name']}, an enthusiastic AI tutor designing a structured lesson.
 
-Introduce the topic: {state['topic']} for a {state['level']} learner.
+Topic: {state['topic']}
+Learner level: {state['level']}
 
-Use {level_guidance.get(state['level'], 'clear examples')} and an analogy to make it engaging.
-End with one compelling question to start the learning.
-{language_instruction}
+Create the opening of the lesson. Your response should:
+1. Briefly introduce the topic in an inviting way.
+2. Mention why this topic matters using {level_guidance.get(state['level'], 'clear examples')}.
+3. Ask the learner what they already know, where they get stuck, or what they want to focus on first.
 
-Keep it brief (2-3 sentences) and warm."""
+Keep it to 3 short sentences and make it feel like the first step of a lesson, not a full explanation.
+{language_instruction}"""
 
     introduction = invoke_llm_with_debug(prompt, "introduce")
     
@@ -134,63 +188,93 @@ Keep it brief (2-3 sentences) and warm."""
     
     return {
         "messages": [assistant_message],
-        "mode": "quiz",
+        "mode": "goal_check",
         "mood": "excited",
+    }
+
+
+def plan_node(state: LearnerState) -> dict[str, Any]:
+    """
+    Turn the learner's stated need into a short structured lesson opening.
+
+    Returns:
+        Updated state with learner goal, first explanation, and checkpoint question
+    """
+    last_user_message = get_last_user_message(state)
+    language_instruction = get_language_instruction(state["language"])
+
+    prompt = f"""You are {state['character_name']}, an AI tutor building a structured lesson.
+
+Topic: {state['topic']}
+Learner level: {state['level']}
+Learner message: {last_user_message}
+
+Write one response that does all of the following:
+1. Acknowledge what the learner wants help with.
+2. Tell them the lesson structure in one short sentence, such as "first we'll understand..., then we'll try a question."
+3. Teach the first key idea simply.
+4. End with exactly one checkpoint question.
+
+Keep it concise, supportive, and interactive.
+{language_instruction}"""
+
+    lesson_opening = invoke_llm_with_debug(prompt, "plan")
+
+    assistant_message = {
+        "role": "assistant",
+        "content": lesson_opening,
+    }
+
+    return {
+        "messages": [assistant_message],
+        "learner_goal": last_user_message,
+        "mode": "quiz",
+        "mood": "happy",
     }
 
 
 def assess_node(state: LearnerState) -> dict[str, Any]:
     """
-    Evaluate student's answer to the quiz question.
-    
-    Calls Claude to determine correctness, identify misconceptions,
-    and provide encouraging feedback in character.
+    Evaluate the learner's answer and continue the lesson interactively.
     
     Args:
         state: Current LearnerState
         
     Returns:
-        Updated state with feedback, correctness count, and mood
+        Updated state with feedback, next step, and checkpoint question
     """
-    if not state["messages"]:
-        return {}
-    
-    # Get the last user message (student's answer)
-    last_user_message = None
-    for msg in reversed(state["messages"]):
-        if msg.get("role") == "user":
-            last_user_message = msg.get("content", "")
-            break
-    
+    last_user_message = get_last_user_message(state)
     if not last_user_message:
         return {}
-    
-    # Build context of conversation
-    conversation = "\n".join([
-        f"{msg['role'].upper()}: {msg['content']}"
-        for msg in state["messages"][-4:]  # Last 4 messages for context
-    ])
+
+    conversation = get_recent_conversation(state)
     language_name = get_language_name(state["language"])
     
-    prompt = f"""You are {state['character_name']}, evaluating a student's answer.
+    prompt = f"""You are {state['character_name']}, running an interactive lesson.
 
 Topic: {state['topic']}
 Level: {state['level']}
+Learner goal: {state['learner_goal'] or "not stated"}
 Recent conversation:
 {conversation}
-Student's answer: {last_user_message}
+Learner's latest response: {last_user_message}
 
 Return valid JSON in this exact shape:
 {{
   "verdict": "correct" | "partial" | "incorrect",
   "misconception": "string describing error or null",
-  "feedback": "warm, encouraging feedback in character (1-2 sentences)"
+  "feedback": "warm feedback about the learner's answer",
+  "micro_explanation": "a short correction or next teaching step",
+  "next_question": "exactly one follow-up checkpoint question"
 }}
 
 Rules:
 - Keep "verdict" in English using only correct, partial, or incorrect.
-- Write "feedback" and "misconception" in {language_name}.
-- Be kind and constructive. Celebrate progress!"""
+- Write "feedback", "misconception", "micro_explanation", and "next_question" in {language_name}.
+- If the learner is correct, briefly reinforce the idea and ask a slightly deeper question.
+- If the learner is partial or incorrect, correct the misunderstanding gently and ask a simpler question that checks the key idea again.
+- Keep the lesson moving one step at a time.
+- Be kind and constructive."""
 
     content = invoke_llm_with_debug(prompt, "assess")
 
@@ -206,6 +290,8 @@ Rules:
             "verdict": "partial",
             "misconception": None,
             "feedback": "Good attempt! Let's explore this more.",
+            "micro_explanation": "Let's look at the main idea one more time in a simpler way.",
+            "next_question": "Can you try answering again in your own words?",
         }
     
     # Update correctness
@@ -222,7 +308,11 @@ Rules:
     # Build assistant response
     assistant_message = {
         "role": "assistant",
-        "content": evaluation["feedback"],
+        "content": join_sections(
+            evaluation.get("feedback", ""),
+            evaluation.get("micro_explanation", ""),
+            evaluation.get("next_question", ""),
+        ),
     }
     
     # Build updates
@@ -231,6 +321,7 @@ Rules:
         "correct_answers": state["correct_answers"] + correct_increment,
         "total_attempts": state["total_attempts"] + 1,
         "mood": mood,
+        "mode": "quiz",
     }
     
     # Add misconception if found
@@ -239,51 +330,6 @@ Rules:
         updates["misconceptions"] = misconceptions
     
     return updates
-
-
-def remediate_node(state: LearnerState) -> dict[str, Any]:
-    """
-    Re-explain concepts using different analogies and approaches.
-    
-    Addresses identified misconceptions with encouraging tone.
-    
-    Args:
-        state: Current LearnerState
-        
-    Returns:
-        Updated state with re-explanation and return to quiz mode
-    """
-    misconceptions_text = ", ".join(state["misconceptions"]) if state["misconceptions"] else "general confusion"
-    language_instruction = get_language_instruction(state["language"])
-    
-    prompt = f"""You are {state['character_name']}, re-teaching a concept.
-
-Topic: {state['topic']}
-Student misconceptions: {misconceptions_text}
-Level: {state['level']}
-
-Provide a fresh explanation using:
-- A DIFFERENT analogy than before
-- Simpler language if needed
-- Clear steps or examples
-- End with a supportive question to check understanding
-{language_instruction}
-
-Never be condescending. Always be encouraging!
-Keep it brief (3-4 sentences)."""
-
-    remediation = invoke_llm_with_debug(prompt, "remediate")
-    
-    assistant_message = {
-        "role": "assistant",
-        "content": remediation,
-    }
-    
-    return {
-        "messages": [assistant_message],
-        "mode": "quiz",
-        "mood": "thinking",
-    }
 
 
 def celebrate_node(state: LearnerState) -> dict[str, Any]:
@@ -308,7 +354,8 @@ Accuracy: {accuracy:.0f}%
 Write an enthusiastic, brief celebration (2-3 sentences) that:
 1. Praises their achievement genuinely
 2. Acknowledges their effort
-3. Suggests a related next topic to explore
+3. Summarizes what they just learned
+4. Suggests a related next topic to explore
 {language_instruction}
 
 Be warm and encouraging!"""
@@ -328,25 +375,29 @@ Be warm and encouraging!"""
 
 def teach_node(state: LearnerState) -> dict[str, Any]:
     """
-    Provide general teaching and explanation.
+    Provide a short explanation when the learner asks for help during the lesson.
     
     Args:
         state: Current LearnerState
         
     Returns:
-        Updated state with explanation
+        Updated state with explanation and a new checkpoint question
     """
+    last_user_message = get_last_user_message(state)
     language_instruction = get_language_instruction(state["language"])
 
-    prompt = f"""You are {state['character_name']}, explaining a concept.
+    prompt = f"""You are {state['character_name']}, continuing a structured lesson.
 
 Topic: {state['topic']}
 Level: {state['level']}
+Learner goal: {state['learner_goal'] or "not stated"}
+Learner's latest message: {last_user_message}
 
-Provide a clear, engaging explanation that:
-1. Uses examples appropriate for {state['level']} learners
-2. Is concise (2-3 sentences)
-3. Ends with a question to deepen understanding
+The learner is asking for more teaching or clarification.
+Provide a response that:
+1. Clarifies the idea in a simple, learner-friendly way
+2. Uses one example appropriate for {state['level']} learners
+3. Ends with exactly one checkpoint question
 {language_instruction}
 
 Make it interactive and warm!"""
@@ -361,4 +412,5 @@ Make it interactive and warm!"""
     return {
         "messages": [assistant_message],
         "mode": "quiz",
+        "mood": "thinking",
     }

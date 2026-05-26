@@ -14,7 +14,16 @@
     "placeholder": "輸入您的訊息...",
     "messagePlaceholder": "與 Nova 家教開始對話...",
     "send": "發送",
-    "stop": "停止"
+    "stop": "停止",
+    "suggestionBadge": "開始建議",
+    "suggestionTitle": "你今天想學什麼？",
+    "suggestionSubtitle": "選擇主題後，Nova 會先介紹主題、了解你會到哪裡，再用一步一步的提問帶你學習。",
+    "currentTopicLabel": "目前主題：",
+    "currentLevelLabel": "程度：",
+    "explainSelectedTopic": "講解 {{topic}}",
+    "otherTopicsLabel": "或選擇其他主題",
+    "topicCardHint": "點選後即可開始學習這個主題",
+    "suggestionExplainPrompt": "我想要一個關於 {{topic}} 的結構化課程。請先介紹主題、教我一個重點，再問我一個問題。"
   },
   "session": {
     "label": "課程：",

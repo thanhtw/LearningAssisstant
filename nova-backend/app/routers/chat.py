@@ -70,6 +70,7 @@ async def stream_chat(
                 "mood": "happy",
                 "character_name": character_name,
                 "language": language,
+                "learner_goal": "",
                 "session_id": session_id,
                 "created_at": datetime.utcnow(),
             }
@@ -101,6 +102,7 @@ async def stream_chat(
             "mood": session["mood"],
             "character_name": session["character_name"],
             "language": session["language"],
+            "learner_goal": session.get("learner_goal", ""),
             "session_id": session_id,
         }
 
@@ -128,6 +130,7 @@ async def stream_chat(
             "topic": session["topic"],
             "level": final_state.get("level", session["level"]),
             "language": session["language"],
+            "learner_goal": final_state.get("learner_goal", session.get("learner_goal", "")),
             "messages": final_messages,
         })
 

@@ -8,8 +8,8 @@ from .state import LearnerState
 from .nodes import (
     router_node,
     introduce_node,
+    plan_node,
     assess_node,
-    remediate_node,
     celebrate_node,
     teach_node,
 )
@@ -22,10 +22,10 @@ def create_learning_graph():
     Workflow:
     - router_node: Conditional entry that routes to appropriate node
     - introduce_node: Greets student and explains topic
-    - assess_node: Evaluates student answer and provides feedback
-    - remediate_node: Addresses misconceptions with different explanation
+    - plan_node: Learns the learner's goal and starts the lesson
+    - assess_node: Evaluates learner answers and advances the lesson
     - celebrate_node: Celebrates mastery and progress
-    - teach_node: Provides general explanation of concept
+    - teach_node: Re-explains when the learner asks for more support
     
     Returns:
         Compiled StateGraph
@@ -34,8 +34,8 @@ def create_learning_graph():
     
     # Add all nodes
     graph.add_node("introduce", introduce_node)
+    graph.add_node("plan", plan_node)
     graph.add_node("assess", assess_node)
-    graph.add_node("remediate", remediate_node)
     graph.add_node("celebrate", celebrate_node)
     graph.add_node("teach", teach_node)
     
@@ -45,16 +45,16 @@ def create_learning_graph():
         router_node,
         {
             "introduce": "introduce",
+            "plan": "plan",
             "assess": "assess",
-            "remediate": "remediate",
             "celebrate": "celebrate",
             "teach": "teach",
         }
     )
     
     graph.add_edge("introduce", END)
+    graph.add_edge("plan", END)
     graph.add_edge("assess", END)
-    graph.add_edge("remediate", END)
     graph.add_edge("celebrate", END)
     graph.add_edge("teach", END)
     

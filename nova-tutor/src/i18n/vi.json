@@ -14,7 +14,16 @@
     "placeholder": "Nhập tin nhắn của bạn...",
     "messagePlaceholder": "Bắt đầu cuộc trò chuyện với Nova Tutor...",
     "send": "Gửi",
-    "stop": "Dừng"
+    "stop": "Dừng",
+    "suggestionBadge": "Gợi ý bắt đầu",
+    "suggestionTitle": "Hôm nay bạn muốn học gì?",
+    "suggestionSubtitle": "Hãy chọn một chủ đề và Nova sẽ giới thiệu chủ đề đó, kiểm tra bạn đã biết gì, rồi hướng dẫn từng bước bằng câu hỏi.",
+    "currentTopicLabel": "Chủ đề đã chọn:",
+    "currentLevelLabel": "Cấp độ:",
+    "explainSelectedTopic": "Giải thích {{topic}}",
+    "otherTopicsLabel": "Hoặc chọn một chủ đề khác",
+    "topicCardHint": "Nhấn để bắt đầu học chủ đề này",
+    "suggestionExplainPrompt": "Tôi muốn một bài học có cấu trúc về {{topic}}. Hãy giới thiệu chủ đề, dạy một ý chính, rồi hỏi tôi một câu."
   },
   "session": {
     "label": "Phiên:",

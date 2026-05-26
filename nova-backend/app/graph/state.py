@@ -17,10 +17,11 @@ class LearnerState(TypedDict):
         correct_answers: Count of correct answers in session
         total_attempts: Total number of quiz attempts
         misconceptions: List of identified misconceptions
-        mode: Current interaction mode ("explain" | "quiz" | "hint" | "celebrate")
+        mode: Current interaction mode ("introduce" | "goal_check" | "teach" | "quiz" | "celebrate")
         mood: Character mood state
         character_name: Name of the AI tutor character
         language: Preferred response language code
+        learner_goal: Learner's stated goal or current need
         session_id: Unique session identifier
     """
     
@@ -34,4 +35,5 @@ class LearnerState(TypedDict):
     mood: str
     character_name: str
     language: str
+    learner_goal: str
     session_id: str

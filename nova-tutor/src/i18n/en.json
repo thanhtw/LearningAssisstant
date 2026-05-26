@@ -14,7 +14,16 @@
     "placeholder": "Type your message...",
     "messagePlaceholder": "Start a conversation with Nova Tutor...",
     "send": "Send",
-    "stop": "Stop"
+    "stop": "Stop",
+    "suggestionBadge": "Suggested Start",
+    "suggestionTitle": "What would you like to learn today?",
+    "suggestionSubtitle": "Pick a topic and Nova will introduce it, check what you know, and guide you with questions step by step.",
+    "currentTopicLabel": "Selected topic:",
+    "currentLevelLabel": "Level:",
+    "explainSelectedTopic": "Explain {{topic}}",
+    "otherTopicsLabel": "Or choose another topic",
+    "topicCardHint": "Tap to start learning this topic",
+    "suggestionExplainPrompt": "I want a structured lesson about {{topic}}. Please introduce the topic, teach one key idea, and ask me a question."
   },
   "session": {
     "label": "Session:",
